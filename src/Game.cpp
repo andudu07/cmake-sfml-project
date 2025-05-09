@@ -1,0 +1,217 @@
+#include <fstream>
+#include <iostream>
+#include <optional>
+
+#include "Game.h"
+
+Game::Game()
+    : window(sf::VideoMode({400, 600}), ""),
+      font(),
+      scoreText(font),
+      menuText(font),
+      highScoreText(font) {
+  if (!font.openFromFile("ARIAL.TTF")) {
+    std::cout << "PROBLEMA FONT\n";
+  }
+
+  scoreText.setFont(font);
+  scoreText.setString("Score: 0");
+  scoreText.setCharacterSize(24);
+  scoreText.setFillColor(sf::Color::Black);
+  scoreText.setPosition({10, 10});
+
+  menuText.setFont(font);
+  menuText.setString("Press ENTER to Start");
+  menuText.setCharacterSize(30);
+  menuText.setFillColor(sf::Color::Black);
+  menuText.setPosition({57, 280});
+
+  highScoreText.setFont(font);
+  loadHighScore();
+  highScoreText.setString("High Score: " + std::to_string(highScore));
+  highScoreText.setCharacterSize(24);
+  highScoreText.setFillColor(sf::Color::Green);
+  highScoreText.setPosition({10, 10});
+
+  resetPlatforms();
+}
+
+void Game::run() {
+  sf::Clock clock;
+  while (window.isOpen()) {
+    float dt = clock.restart().asSeconds();
+    processEvents();
+
+    if (!gameOver) {
+      update(dt);
+    }
+
+    render();
+  }
+}
+
+void Game::processEvents() {  
+  while (auto event = window.pollEvent()) {
+    if (event->is<sf::Event::Closed>()) {
+      window.close();
+    } else if (event->is<sf::Event::KeyPressed>()) {
+      if (auto keyEvent = event->getIf<sf::Event::KeyPressed>()) {
+        if (keyEvent->code == sf::Keyboard::Key::Escape) {
+          window.close();
+        }
+        if (gameOver && keyEvent->code == sf::Keyboard::Key::Enter) {
+          gameOver = false;
+          resetPlatforms();
+          score = 0;
+          player = Player(); // se reseteaza pozitia playerului si velocityul 
+          obstacle.deactivate();
+        }
+      }
+    }
+  }
+}
+
+void Game::update(float dt) {
+  if (player.getPosition().y > 600) {
+    gameOver = true;
+    std::cout << "HIGHSCORE:" << highScore << std::endl;
+    saveHighScore();
+    return;
+  }
+  player.update(dt);
+  if (obstacle.isActive()) {
+    obstacle.update(dt);
+  }
+  sf::FloatRect playerBounds = player.getBounds();
+  sf::Vector2f playerVelocity = player.getVelocity();
+
+  // Check collision if player is moving down
+  if (playerVelocity.y > 0) {
+    for (auto& platform : platforms) {
+      sf::FloatRect platformBounds = platform.getBounds();
+
+      if (playerBounds.findIntersection(platformBounds)) {
+        // Check if player's bottom is touching the platform
+
+        float playerBottom = playerBounds.position.y + playerBounds.size.y;
+        float platformTop = platformBounds.position.y;
+
+        float landingTolerance = 5.0f; // marj
+
+        if (playerBottom >= platformTop &&
+            playerBottom <= platformTop + landingTolerance) {
+          player.jump();
+          break;  // Exit after the first valid collision
+        }
+      }
+    }
+  }
+
+  if (player.getPosition().y < 240) {
+    float diff = 240 - player.getPosition().y;
+    player.move(0, diff);
+    for (auto& platform : platforms) {
+      platform.move(0, diff);
+    }
+    if (obstacle.isActive()) {
+      obstacle.move(0, diff);
+    }
+  }
+ 
+  // lirili larila
+  if (obstacle.isActive()) {
+    if (obstacle.shouldRemove()) {
+      obstacle.deactivate();
+    }
+    if (player.getBounds().findIntersection(obstacle.getBounds())) {
+      gameOver = 1;
+      saveHighScore();
+    }
+  }
+  if (score % 25 == 0 && score != 0) {
+    obstacle.activate();
+  }
+
+
+	//reciclarea platformelor
+	std::vector<Platform*> platformsToRecycle;
+  for (auto& platform : platforms) {
+    if (platform.getPosition().y > 600) {
+      platform.scored = false;
+      platformsToRecycle.push_back(&platform);
+    }
+  }
+
+  
+  // Reposition them above the current highest platform
+  float highestY = 600.f;
+  for (const auto& p : platforms) {
+    if (p.getPosition().y < highestY) {
+      highestY = p.getPosition().y;
+    }
+  }
+
+  for (auto* platform : platformsToRecycle) {
+    platform->setPosition(rand() % 340, highestY - 100);
+    highestY -= 100;  // Update for next platform
+  }
+	
+
+	//keeping the score
+  for (auto& platform : platforms) {
+    if (platform.getPosition().y > player.getPosition().y &&
+        !platform.scored) {  
+      score++;
+      platform.scored = true;
+    }
+  }
+
+  
+  scoreText.setString("Score: " + std::to_string(score));
+}
+
+void Game::render() {
+  window.clear(sf::Color::White);
+  if (gameOver) { //afisare meniu
+    window.draw(highScoreText);
+    window.draw(menuText);
+  } else { //afisare joc in desfasurare
+    for (auto& platform : platforms) {
+      platform.draw(window);
+    }
+    if (obstacle.isActive()) {
+      obstacle.draw(window);
+    }
+    player.draw(window);
+
+    window.draw(scoreText);
+  }
+  window.display();
+}
+
+void Game::resetPlatforms() {
+  platforms.clear();
+  for (int i = 0; i < platformCount; ++i) {
+    int x = rand() % 340;
+    int y = i * 90;
+    std::cout << "COORDONATE PLATFORMA: " << x << " " << y << std::endl;
+    platforms.emplace_back(x, y);
+  }
+}
+
+void Game::loadHighScore() {
+  std::ifstream filein("highscore.txt");
+  filein >> highScore;
+  filein.close();
+}
+
+void Game::saveHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    highScoreText.setString("High Score: " + std::to_string(highScore));
+    std::ofstream fileout("highscore.txt");
+    fileout << highScore;
+    fileout.close();
+  }
+}
+
