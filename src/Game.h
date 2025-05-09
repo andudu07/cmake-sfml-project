@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
-
 #include "Obstacle.h"
 #include "Platform.h"
 #include "Player.h"

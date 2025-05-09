@@ -1,20 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Character.h"
 
-class Player {
+
+class Player : public Character {
  public:
   Player();
-  void update(float dt);
-  void draw(sf::RenderWindow& window);
+  void update(float dt) override;
   void jump();
-  void move(float dx, float dy);
-  sf::FloatRect getBounds() const;
-  sf::Vector2f getPosition() const;
-  sf::Vector2f getVelocity() const;
 
- private:
-  static sf::Texture tex;
-  sf::Sprite sprite;
-  sf::Vector2f velocity;
 };
 

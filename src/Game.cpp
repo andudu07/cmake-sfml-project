@@ -50,7 +50,7 @@ void Game::run() {
   }
 }
 
-void Game::processEvents() {  
+void Game::processEvents() {
   while (auto event = window.pollEvent()) {
     if (event->is<sf::Event::Closed>()) {
       window.close();
@@ -63,7 +63,7 @@ void Game::processEvents() {
           gameOver = false;
           resetPlatforms();
           score = 0;
-          player = Player(); // se reseteaza pozitia playerului si velocityul 
+          player = Player();  // se reseteaza pozitia playerului si velocityul
           obstacle.deactivate();
         }
       }
@@ -96,7 +96,7 @@ void Game::update(float dt) {
         float playerBottom = playerBounds.position.y + playerBounds.size.y;
         float platformTop = platformBounds.position.y;
 
-        float landingTolerance = 5.0f; // marj
+        float landingTolerance = 5.0f;  // marj
 
         if (playerBottom >= platformTop &&
             playerBottom <= platformTop + landingTolerance) {
@@ -117,7 +117,7 @@ void Game::update(float dt) {
       obstacle.move(0, diff);
     }
   }
- 
+
   // lirili larila
   if (obstacle.isActive()) {
     if (obstacle.shouldRemove()) {
@@ -132,9 +132,8 @@ void Game::update(float dt) {
     obstacle.activate();
   }
 
-
-	//reciclarea platformelor
-	std::vector<Platform*> platformsToRecycle;
+  // reciclarea platformelor
+  std::vector<Platform*> platformsToRecycle;
   for (auto& platform : platforms) {
     if (platform.getPosition().y > 600) {
       platform.scored = false;
@@ -142,7 +141,6 @@ void Game::update(float dt) {
     }
   }
 
-  
   // Reposition them above the current highest platform
   float highestY = 600.f;
   for (const auto& p : platforms) {
@@ -155,27 +153,24 @@ void Game::update(float dt) {
     platform->setPosition(rand() % 340, highestY - 100);
     highestY -= 100;  // Update for next platform
   }
-	
 
-	//keeping the score
+  // keeping the score
   for (auto& platform : platforms) {
-    if (platform.getPosition().y > player.getPosition().y &&
-        !platform.scored) {  
+    if (platform.getPosition().y > player.getPosition().y && !platform.scored) {
       score++;
       platform.scored = true;
     }
   }
 
-  
   scoreText.setString("Score: " + std::to_string(score));
 }
 
 void Game::render() {
   window.clear(sf::Color::White);
-  if (gameOver) { //afisare meniu
+  if (gameOver) {  // afisare meniu
     window.draw(highScoreText);
     window.draw(menuText);
-  } else { //afisare joc in desfasurare
+  } else {  // afisare joc in desfasurare
     for (auto& platform : platforms) {
       platform.draw(window);
     }
@@ -200,9 +195,33 @@ void Game::resetPlatforms() {
 }
 
 void Game::loadHighScore() {
-  std::ifstream filein("highscore.txt");
-  filein >> highScore;
-  filein.close();
+  const std::string filename = "highscore.txt";
+
+  try {
+    std::ifstream file(filename);
+    if (!file.good()) {
+      throw HighScoreException(HighScoreException::ErrorType::FileNotFound,
+                               filename);
+    }
+
+    int score;
+    if (!(file >> score)) {
+      throw HighScoreException(HighScoreException::ErrorType::InvalidFormat,
+                               filename);
+    }
+
+    if (score < 0 ||
+        score > 99999) {  // verifica daca scorul este posibil is plauzibil
+      throw HighScoreException(HighScoreException::ErrorType::CorruptData,
+                               filename, score);
+    }
+
+    highScore = score;
+  } catch (const HighScoreException& e) {
+    std::cerr << "HIGH SCORE ERROR: " << e.what() << "\n";
+    e.createDefaultFile();
+    highScore = 0;
+  }
 }
 
 void Game::saveHighScore() {

@@ -2,33 +2,28 @@
 
 #include "Obstacle.h"
 
-Obstacle::Obstacle() : tex(), sprite(tex) {
-  if (!tex.loadFromFile("lirili.png")) {
-    std::cout << "PROBLEMA LIRILI\n";
-  }
-  sprite.setTexture(tex, true);
-  sprite.setScale({0.17, 0.17});
+Obstacle::Obstacle() {
+ 	loadTexture("lirili.png"); 
+	sprite.setScale({0.17, 0.17});
+	start_pos = {0, -100};
+	velocity = {150, 0};
 }
 
 void Obstacle::update(float dt) {
   if (sprite.getPosition().x > 350 || sprite.getPosition().x < 0)
     changeDirection();
   // Horizontal movement
-  float horizontalMove = (direction == 1) ? speed : -speed;
+  float horizontalMove = (direction == 1) ? velocity.x : -velocity.x;
   sprite.move({horizontalMove * dt, 0});
 }
 
 void Obstacle::changeDirection() { direction = !direction; }
 
-void Obstacle::draw(sf::RenderWindow& window) const { window.draw(sprite); }
 
-sf::Vector2f Obstacle::getPosition() const { return sprite.getPosition(); }
 
-void Obstacle::move(float dx, float dy) { sprite.move({dx, dy}); }
 
 sf::FloatRect Obstacle::getBounds() const {
-  std::cout << "DIMENSIUNI ELEFANT: " << sprite.getGlobalBounds().size.x << "  "
-            << sprite.getGlobalBounds().size.y << std::endl;
+
   sf::FloatRect smallRect = sprite.getGlobalBounds();
   smallRect.size = {55, 55};
   smallRect.position.x += 20;
