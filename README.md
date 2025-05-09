@@ -5,21 +5,33 @@ Recreare a jocului doodle jump cu un twist italienesc memetic
 Reguli ale Jocului:
 
 Controale:
+
 Sageti stanga/dreapta : Miscare stanga/dreapta
+
 SPACE: Saritura
+
 Scorul:
+
 Creste cu 1 atunci cand treci de o platforma
+
 Scorul se actualizeaza in timp real in coltul stanga sus
+
 High score-ul este salvat intre sesiuni
+
 Obstacole:
+
 Apare un obstacol miscator (Lirili) la fiecare 25 de puncte
+
 Daca lovesti obstacolul sau cazi sub ultima platforma, e game over
 
 --Mosteniri si Clase
 
 Ierarhie de clase:
+
 Character (clasa de baza)
+
 Player (derivata)
+
 Obstacle (derivata)
 
 --Functii Virtuale
@@ -31,15 +43,18 @@ getBounds() - virtuala cu implementare specifica in Obstacle pentru hitbox mai m
 --Exceptii
 
 GameException (clasa de baza)
+
 TextureLoadException
+
 HighScoreException
+
 GameStateException
 
 Au fost utilizate in:
 
 Incarcare texturi
+
 Citire/scriere high score
-Validarea starii jocului
 
 
 --STL
