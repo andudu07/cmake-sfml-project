@@ -22,9 +22,11 @@ class Game {
 
   sf::RenderWindow window;
   Player player;
-  std::vector<Platform> platforms;
+  std::vector<Platform<sf::RectangleShape>> platforms;
+	Platform<sf::CircleShape> bouncer;
   Obstacle obstacle;
-  const static int platformCount = 10;
+  const static int platformCount = 15;
+	const static int bouncerCount = 1;
 
   void loadHighScore();
   void saveHighScore();

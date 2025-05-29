@@ -30,7 +30,7 @@ void Player::update(float dt) {
 }
 
 
-void Player::jump() { velocity.y = -550; }
+void Player::jump(float dt) { velocity.y = dt; }
 
 
 

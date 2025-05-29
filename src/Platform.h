@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
+
+template <typename ShapeType>
 class Platform {
  public:
   bool scored = false;
@@ -12,6 +14,6 @@ class Platform {
   void move(float dx, float dy);
 
  private:
-  sf::RectangleShape shape;
+ 	ShapeType shape;
 };
 

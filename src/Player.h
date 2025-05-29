@@ -7,7 +7,7 @@ class Player : public Character {
  public:
   Player();
   void update(float dt) override;
-  void jump();
+  void jump(float dt);
 
 };
 
