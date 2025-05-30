@@ -21,18 +21,18 @@ Atunci cand patapim atinge platforme, e propulsat automat in sus. In caz ca plat
 - Apare un obstacol mișcător (Lirili) la fiecare 25 de puncte
 - Dacă lovești obstacolul sau cazi sub ultima platformă, e game over
 
-## Arhitectura Codului
 
-### Moșteniri și Clase
+
+## Moșteniri și Clase
 - Character (clasa de bază)
   - Player (derivată)
   - Obstacle (derivată)
 
-### Funcții Virtuale
+## Funcții Virtuale
 - update() - funcție virtuală pură implementată diferit în Player și Obstacle
 - getBounds() - virtuală cu implementare specifică în Obstacle pentru hitbox mai mic
 
-### Excepții
+## Excepții
 - GameException (clasa de bază)
   - TextureLoadException
   - HighScoreException
@@ -41,16 +41,16 @@ Utilizate în:
 - Încărcare texturi
 - Citire/scriere high score
 
-### Caracteristici Tehnice
+## Caracteristici Tehnice
 - STL: Folosire std::vector pentru platforme
 - Metode const: Implementate pentru acces sigur la date
 - Separare cod: Header/sursă pentru toate clasele majore
 - Fără using namespace std: Cod curat și explicit
 
-### Templates
+## Templates
 - clasa template este Platform
 - functia libera template este checkCollision
 
-### Design Patterns
+## Design Patterns
 - Singleton pentru clasa Game
 - Object pool pentru reciclarea platformelor
