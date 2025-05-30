@@ -13,7 +13,7 @@ Game::Game()
       menuText(font),
       highScoreText(font),
 			bouncer(0, 0),
-			platformPool(15){
+			platformPool(30){
   if (!font.openFromFile("ARIAL.TTF")) {
     std::cout << "PROBLEMA FONT\n";
   }
@@ -180,9 +180,11 @@ void Game::update(float dt) {
 	}
 
   for (auto& platform : platformPool.availablePlatforms) {
-    auto tempPlatform = platformPool.getPlatform();
-		tempPlatform->setPosition(rand() % 340, highestY - 100);
-		highestY -= 100;  // Update for next platform
+   	if(platform != NULL){
+			auto tempPlatform = platformPool.getPlatform();
+			tempPlatform->setPosition(rand() % 340, highestY - 100);
+			highestY -= 100;  // Update for next platform
+		}
 	}
 	
 	if(bouncerNeedsRecycle) bouncer.setPosition(rand() % 340, highestY - 100);
@@ -212,8 +214,8 @@ void Game::render() {
     window.draw(highScoreText);
     window.draw(menuText);
   } else {  // afisare joc in desfasurare
-    for (auto& platform : platforms) {
-      platform.draw(window);
+    for (auto& platform : platformPool.busyPlatforms) {
+      platform->draw(window);
     }
 		bouncer.draw(window);
     if (obstacle.isActive()) {

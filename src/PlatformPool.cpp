@@ -6,8 +6,6 @@ PlatformPool::PlatformPool(size_t initialSize) {
   }
 }
 
-
-
 std::shared_ptr<Platform<sf::RectangleShape>> PlatformPool::getPlatform() {
     if (availablePlatforms.empty()) {
         throw std::runtime_error("Nu exista platforme disponibile");
