@@ -1,65 +1,56 @@
-Recreare a jocului doodle jump cu un twist italienesc memetic
+# Doodle Jump brainrot mode
 
-**Joc platformer 2D scris in C++ folosind biblioteca SFML. Jucatorul il controleaza pe Brr Brr Patapim care trebuie sa sara intre platforme pentru a castiga puncte, evitand-o pe Lirili Larila, care apare periodic.
+Recrearea jocului Doodle Jump cu un twist italienesc memetic
 
+Joc platformer 2D scris în C++ folosind biblioteca SFML. Jucătorul îl controlează pe Brr Brr Patapim care trebuie să sară între platforme pentru a câștiga puncte, evitând-o pe Lirili Larila, care apare periodic.
 
-*Controale:
+Atunci cand patapim atinge platforme, e propulsat automat in sus. In caz ca platforma e de tip trambulina, saritura e pe masura.
 
-Sageti stanga/dreapta : Miscare stanga/dreapta
+## Controale
 
-SPACE: Saritura
+- Săgeți stânga/dreapta: Mișcare stânga/dreapta
 
-Scorul:
+## Scorul
 
-Creste cu 1 atunci cand treci de o platforma
+- Crește cu 1 atunci când treci de o platformă
+- Scorul se actualizează în timp real în colțul stânga sus
+- High score-ul este salvat între sesiuni
 
-Scorul se actualizeaza in timp real in coltul stanga sus
+## Obstacole
 
-High score-ul este salvat intre sesiuni
+- Apare un obstacol mișcător (Lirili) la fiecare 25 de puncte
+- Dacă lovești obstacolul sau cazi sub ultima platformă, e game over
 
-*Obstacole:
+## Arhitectura Codului
 
-Apare un obstacol miscator (Lirili) la fiecare 25 de puncte
+### Moșteniri și Clase
+- Character (clasa de bază)
+  - Player (derivată)
+  - Obstacle (derivată)
 
-Daca lovesti obstacolul sau cazi sub ultima platforma, e game over
+### Funcții Virtuale
+- update() - funcție virtuală pură implementată diferit în Player și Obstacle
+- getBounds() - virtuală cu implementare specifică în Obstacle pentru hitbox mai mic
 
-*Mosteniri si Clase
+### Excepții
+- GameException (clasa de bază)
+  - TextureLoadException
+  - HighScoreException
 
-Character (clasa de baza)
+Utilizate în:
+- Încărcare texturi
+- Citire/scriere high score
 
-Player (derivata)
+### Caracteristici Tehnice
+- STL: Folosire std::vector pentru platforme
+- Metode const: Implementate pentru acces sigur la date
+- Separare cod: Header/sursă pentru toate clasele majore
+- Fără using namespace std: Cod curat și explicit
 
-Obstacle (derivata)
+### Templates
+- clasa template este Platform
+- functia libera template este checkCollision
 
-*Functii Virtuale
-
-update() - functie virtuala pura implementata diferit in Player si Obstacle
-
-getBounds() - virtuala cu implementare specifica in Obstacle pentru hitbox mai mic
-
-*Exceptii
-
-GameException (clasa de baza)
-
-TextureLoadException
-
-HighScoreException
-
-
-Au fost utilizate in:
-
-Incarcare texturi
-
-Citire/scriere high score
-
-
-*STL
-
-*Folosire std::vector pentru platforme
-
-*Metode const
-
-*Separare cod: header/sursa pentru toate clasele majore
-*Fara using namespace std
-
-
+### Design Patterns
+- Singleton pentru clasa Game
+- Object pool pentru reciclarea platformelor
