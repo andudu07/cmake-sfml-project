@@ -13,7 +13,7 @@ Game::Game()
       menuText(font),
       highScoreText(font),
 			bouncer(0, 0),
-			platformPool(30){
+			platformPool(15){
   if (!font.openFromFile("ARIAL.TTF")) {
     std::cout << "PROBLEMA FONT\n";
   }
@@ -178,15 +178,15 @@ void Game::update(float dt) {
 	if(bouncer.getPosition().y < highestY) {
 		highestY = bouncer.getPosition().y;
 	}
-
-  for (auto& platform : platformPool.availablePlatforms) {
-   	if(platform != NULL){
+	
+	if(!platformPool.availablePlatforms.empty()) {
+		for (auto& platform : platformPool.availablePlatforms) {
 			auto tempPlatform = platformPool.getPlatform();
 			tempPlatform->setPosition(rand() % 340, highestY - 100);
 			highestY -= 100;  // Update for next platform
 		}
 	}
-	
+
 	if(bouncerNeedsRecycle) bouncer.setPosition(rand() % 340, highestY - 100);
 
   // keeping the score
@@ -230,7 +230,6 @@ void Game::render() {
 
 void Game::resetPlatforms() {
  	platformPool.clear();
-
 	int x;
 	int y;
   for (int i = 0; i < platformCount; i++) {
