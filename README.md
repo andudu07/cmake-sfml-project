@@ -49,6 +49,7 @@ Utilizate în:
 
 ## Templates
 - clasa template este Platform
+- atributul te tip T este shape
 - functia libera template este checkCollision
 
 ## Design Patterns
