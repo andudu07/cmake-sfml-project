@@ -12,7 +12,8 @@ Game::Game()
       scoreText(font),
       menuText(font),
       highScoreText(font),
-			bouncer(0, 0){
+			bouncer(0, 0),
+			platformPool(15){
   if (!font.openFromFile("ARIAL.TTF")) {
     std::cout << "PROBLEMA FONT\n";
   }
@@ -90,10 +91,10 @@ void Game::update(float dt) {
 
   // Check collision if player is moving down
   if (playerVelocity.y > 0) {
-    for (auto& platform : platforms) {
-      sf::FloatRect platformBounds = platform.getBounds();
+    for (auto& platform : platformPool.busyPlatforms) {
+      sf::FloatRect platformBounds = platform->getBounds();
 
-      if (playerBounds.findIntersection(platformBounds)) {
+      if (playerBounds.findIntersection(platformBounds).has_value()) {
         // Check if player's bottom is touching the platform
 
         float playerBottom = playerBounds.position.y + playerBounds.size.y;
@@ -111,7 +112,7 @@ void Game::update(float dt) {
 
 		//trambulina
 		sf::FloatRect platformBounds = bouncer.getBounds();
-		if (playerBounds.findIntersection(platformBounds)) {
+		if (checkCollision(player, bouncer)) {
 			// Check if player's bottom is touching the platform
 
 			float playerBottom = playerBounds.position.y + playerBounds.size.y;
@@ -128,8 +129,8 @@ void Game::update(float dt) {
   if (player.getPosition().y < 240) {
     float diff = 240 - player.getPosition().y;
     player.move(0, diff);
-    for (auto& platform : platforms) {
-      platform.move(0, diff);
+    for (auto& platform : platformPool.busyPlatforms) {
+      platform->move(0, diff);
     }
 		bouncer.move(0, diff);
     if (obstacle.isActive()) {
@@ -142,7 +143,7 @@ void Game::update(float dt) {
     if (obstacle.shouldRemove()) {
       obstacle.deactivate();
     }
-    if (player.getBounds().findIntersection(obstacle.getBounds())) {
+    if (checkCollision(player, obstacle)) {
       gameOver = 1;
       saveHighScore();
     }
@@ -152,13 +153,14 @@ void Game::update(float dt) {
   }
 
   // reciclarea platformelor
-  std::vector<Platform<sf::RectangleShape>*> platformsToRecycle;
+  //std::vector<Platform<sf::RectangleShape>*> platformsToRecycle;
   bool bouncerNeedsRecycle = false;
-	for (auto& platform : platforms) {
-    if (platform.getPosition().y > 600) {
-      platform.scored = false;
-      platformsToRecycle.push_back(&platform);
-    }
+	for (auto& platform : platformPool.busyPlatforms) {
+    if (platform->getPosition().y > 600) {
+      platform->scored = false;
+      //platformsToRecycle.push_back(&platform);
+    	platformPool.recPlatform(platform);
+		}
   }
 	if(bouncer.getPosition().y > 600) {
 		bouncer.scored = false;
@@ -167,27 +169,29 @@ void Game::update(float dt) {
 
   // Reposition them above the current highest platform
   float highestY = 600.f;
-  for (const auto& p : platforms) {
-    if (p.getPosition().y < highestY) {
-      highestY = p.getPosition().y;
+  for (const auto& p : platformPool.busyPlatforms) {
+    if (p->getPosition().y < highestY) {
+      highestY = p->getPosition().y;
     }
   }
+
 	if(bouncer.getPosition().y < highestY) {
 		highestY = bouncer.getPosition().y;
 	}
 
-  for (auto* platform : platformsToRecycle) {
-    platform->setPosition(rand() % 340, highestY - 100);
-    highestY -= 100;  // Update for next platform
-  }
+  for (auto& platform : platformPool.availablePlatforms) {
+    auto tempPlatform = platformPool.getPlatform();
+		tempPlatform->setPosition(rand() % 340, highestY - 100);
+		highestY -= 100;  // Update for next platform
+	}
 	
 	if(bouncerNeedsRecycle) bouncer.setPosition(rand() % 340, highestY - 100);
 
   // keeping the score
-  for (auto& platform : platforms) {
-    if (platform.getPosition().y > player.getPosition().y && !platform.scored) {
+  for (auto& platform : platformPool.busyPlatforms) {
+    if (platform->getPosition().y > player.getPosition().y && !platform->scored) {
       score++;
-      platform.scored = true;
+      platform->scored = true;
     }
   }
 	if (bouncer.getPosition().y > player.getPosition().y && !bouncer.scored) {
@@ -199,6 +203,8 @@ void Game::update(float dt) {
 
   scoreText.setString("Score: " + std::to_string(score));
 }
+
+
 
 void Game::render() {
   window.clear(sf::Color::White);
@@ -221,18 +227,20 @@ void Game::render() {
 }
 
 void Game::resetPlatforms() {
-  platforms.clear();
+ 	platformPool.clear();
+
 	int x;
 	int y;
-  for (int i = 0; i < platformCount; ++i) {
+  for (int i = 0; i < platformCount; i++) {
    	x = rand() % 340;
    	y = i * 90;
     std::cout << "COORDONATE PLATFORMA: " << x << " " << y << std::endl;
-    platforms.emplace_back(x, y);
+    auto platform = platformPool.getPlatform();
+		platform->setPosition(x, y);
   }
 	x = rand() % 340;
 	y = platformCount * 90;
-	bouncer = Platform<sf::CircleShape>(x, y);
+	bouncer.setPosition(x, y);
 }
 
 void Game::loadHighScore() {
