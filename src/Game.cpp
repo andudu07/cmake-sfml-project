@@ -153,15 +153,19 @@ void Game::update(float dt) {
   }
 
   // reciclarea platformelor
-  //std::vector<Platform<sf::RectangleShape>*> platformsToRecycle;
+  std::vector<std::shared_ptr<Platform<sf::RectangleShape>>> platformsToRecycle;
   bool bouncerNeedsRecycle = false;
 	for (auto& platform : platformPool.busyPlatforms) {
     if (platform->getPosition().y > 600) {
       platform->scored = false;
-      //platformsToRecycle.push_back(&platform);
-    	platformPool.recPlatform(platform);
+      platformsToRecycle.push_back(platform);
 		}
   }
+
+	for (auto& platform : platformsToRecycle){
+		platformPool.recPlatform(platform);
+	}
+
 	if(bouncer.getPosition().y > 600) {
 		bouncer.scored = false;
 		bouncerNeedsRecycle = true;
@@ -178,15 +182,12 @@ void Game::update(float dt) {
 	if(bouncer.getPosition().y < highestY) {
 		highestY = bouncer.getPosition().y;
 	}
-	
-	if(!platformPool.availablePlatforms.empty()) {
-		for (auto& platform : platformPool.availablePlatforms) {
-			auto tempPlatform = platformPool.getPlatform();
-			tempPlatform->setPosition(rand() % 340, highestY - 100);
-			highestY -= 100;  // Update for next platform
-		}
+	size_t platformsToCreate = platformsToRecycle.size();
+  for (size_t i = 0; i < platformsToCreate && !platformPool.availablePlatforms.empty(); ++i) {
+		auto tempPlatform = platformPool.getPlatform();
+ 		tempPlatform->setPosition(rand() % 340, highestY - 100);
+  	highestY -= 100;
 	}
-
 	if(bouncerNeedsRecycle) bouncer.setPosition(rand() % 340, highestY - 100);
 
   // keeping the score

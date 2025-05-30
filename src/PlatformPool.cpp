@@ -18,8 +18,15 @@ std::shared_ptr<Platform<sf::RectangleShape>> PlatformPool::getPlatform() {
 }
 
 void PlatformPool::clear(){
-	busyPlatforms.clear();
-	availablePlatforms.clear();
+	size_t totalPlatforms = busyPlatforms.size() + availablePlatforms.size();
+    
+  busyPlatforms.clear();
+  availablePlatforms.clear();
+    
+  // Repopulate available platforms
+  for (size_t i = 0; i < totalPlatforms; ++i) {
+  	availablePlatforms.push_back(std::make_shared<Platform<sf::RectangleShape>>(0, 0));
+  }
 }
 
 void PlatformPool::recPlatform(std::shared_ptr<Platform<sf::RectangleShape>> platform) {

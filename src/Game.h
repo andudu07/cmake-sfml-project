@@ -9,10 +9,16 @@
 
 class Game {
  public:
-  Game();
   void run();
-
+	Game(const Game&) = delete;
+  Game& operator=(const Game&) = delete;
+  
+  static Game& getInstance() {
+    static Game instance;
+    return instance;
+  }
  private:
+ 	Game();
   PlatformPool platformPool;
 	bool gameOver = 1;
   unsigned int score = 0;

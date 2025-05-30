@@ -4,8 +4,10 @@
 
 int main() {
 	srand((int) time(0));
-	Game game;
+	
+	Game& game = Game::getInstance();
 	game.run();
+	
 	return 0;
 }
 
